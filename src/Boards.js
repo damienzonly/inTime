@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Row, Col, Card, Slider } from "antd";
 
-export default class Lists extends Component {
+export default class Boards extends Component {
     constructor(props) {
         super(props);
         this.marks = {
@@ -11,10 +11,10 @@ export default class Lists extends Component {
         };
     }
     render() {
-        let lists = Object.keys(this.props.lists);
+        let boards = Object.keys(this.props.boards);
         let rows = [];
         let cols = [];
-        for (let [index, item] of lists.entries()) {
+        for (let [index, item] of boards.entries()) {
             // continue to append
             let newCard = (
                 <Card
@@ -40,7 +40,7 @@ export default class Lists extends Component {
                     {newCard}
                 </Col>
             );
-            if (cols.length === this.props.columns || index === lists.length - 1) {
+            if (cols.length === this.props.columns || index === boards.length - 1) {
                 // close the row
                 rows.push(<Row key={rows.length}>{cols}</Row>);
                 cols = [];
