@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Row, Col, Card, Slider } from "antd";
+import { Row, Col, Card, Slider, List, Tag } from "antd";
 
 export default class Boards extends Component {
     constructor(props) {
@@ -14,18 +14,39 @@ export default class Boards extends Component {
         let boards = Object.keys(this.props.boards);
         let rows = [];
         let cols = [];
-        for (let [index, item] of boards.entries()) {
+        for (let [index, boardName] of boards.entries()) {
+            let items = this.props.getBoardClone(boardName).items.slice(0, 11);
             // continue to append
+            let color = {
+                critical: "volcano",
+                major: "orange",
+                minor: "blue",
+                trivial: "cyan"
+            };
             let newCard = (
                 <Card
-                    title={item}
+                    title={boardName}
                     style={{
                         marginLeft: "auto",
                         marginRight: "auto",
-                        width: 300
+                        width: 300,
+                        height: 400,
+                        overflow: "auto"
                     }}
                 >
-                    Inner content
+                    <List
+                        split={false}
+                        size="large"
+                        dataSource={items}
+                        renderItem={item => (
+                            <List.Item>
+                                <span>
+                                    <Tag color={color[item.priority]}>{item.priority.toUpperCase()}</Tag>
+                                    <span>{item.text}</span>
+                                </span>
+                            </List.Item>
+                        )}
+                    />
                 </Card>
             );
 
