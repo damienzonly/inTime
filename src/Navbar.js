@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Menu } from "antd";
+import { Menu, Icon } from "antd";
 import { Link } from "react-router-dom";
 const { SubMenu } = Menu;
 
@@ -30,7 +30,17 @@ export default class Navbar extends Component {
         let subMenu;
         if (boardsMenu) {
             subMenu = (
-                <SubMenu key="2" title="Your boards">
+                <SubMenu
+                    key="2"
+                    title={
+                        <span>
+                            <Icon type="form" />
+                            <span>
+                                Your Boards
+                            </span>
+                        </span>
+                    }
+                >
                     {boardsMenu}
                 </SubMenu>
             );
@@ -39,7 +49,8 @@ export default class Navbar extends Component {
             <>
                 <Menu theme="dark" style={{ minHeight: "100vh" }} mode="inline">
                     <Menu.Item key="1">
-                        <span> Boards</span>
+                        <Icon type="dashboard" />
+                        <span> Dashboard </span>
                         <Link to="/" />
                     </Menu.Item>
                     {subMenu}
