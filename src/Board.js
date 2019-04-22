@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Row, Col, Input, Breadcrumb, List, Slider, Select } from "antd";
+import { Row, Col, Input, Breadcrumb, Slider, Select, Table, Tag } from "antd";
 
 export default class Board extends Component {
     constructor(props) {
@@ -40,6 +40,7 @@ export default class Board extends Component {
                         />
                     </Col>
                 </Row>
+
                 <Row>
                     <Col {...spacing}>
                         <Breadcrumb separator="/" style={{ marginTop: "60px" }}>
@@ -48,11 +49,13 @@ export default class Board extends Component {
                         </Breadcrumb>
                     </Col>
                 </Row>
+
                 <Row>
                     <Col {...spacing} style={{ marginTop: 20 }}>
                         <div>{this.props.board.description}</div>
                     </Col>
                 </Row>
+
                 <Row>
                     <Col
                         {...spacing}
@@ -91,16 +94,120 @@ export default class Board extends Component {
                         </div>
                     </Col>
                 </Row>
+
                 <Row>
-                    <Col {...spacing}>
-                        <List
+                    <Col
+                        {...spacing}
+                        style={{
+                            marginBottom: 150
+                        }}
+                    >
+                        <Table
+                            style={{
+                                marginTop: 30
+                            }}
                             size="large"
-                            dataSource={this.props.board.items.map(item => item.text)}
-                            renderItem={item => (
-                                <List.Item>
-                                    <span style={{ fontSize: this.props.fontSize }}>{item}</span>
-                                </List.Item>
-                            )}
+                            dataSource={this.props.board.items.map((item, index) => {
+                                return { ...item, key: index };
+                            })}
+                            columns={[
+                                {
+                                    title: "Priority",
+                                    dataIndex: "priority",
+                                    key: "piority",
+                                    render: (prt, record) => {
+                                        let color = {
+                                            critical: "volcano",
+                                            major: "orange",
+                                            minor: "blue",
+                                            trivial: "cyan"
+                                        }[prt];
+
+                                        return (
+                                            <Tag color={color} key={record.key}>
+                                                {prt.toUpperCase()}
+                                            </Tag>
+                                        );
+                                    },
+                                    filters: [
+                                        {
+                                            text: "Critical",
+                                            value: "critical"
+                                        },
+                                        {
+                                            text: "Major",
+                                            value: "major"
+                                        },
+
+                                        {
+                                            text: "Minor",
+                                            value: "minor"
+                                        },
+                                        {
+                                            text: "Trivial",
+                                            value: "trivial"
+                                        }
+                                    ],
+                                    onFilter: (value, record) => {
+                                        return record.priority === value;
+                                    },
+                                    sorter: (a, b) => {
+                                        let pts = ["critical", "major", "minor", "trivial"];
+                                        let map = {};
+                                        pts.map((item, index) => Object.assign(map, { [item]: index }));
+                                        return map[a.priority] - map[b.priority];
+                                    },
+                                    sortDirections: ["ascend", "descend"]
+                                },
+                                {
+                                    title: "Description",
+                                    dataIndex: "text",
+                                    key: "text",
+                                    render: (text, record) => {
+                                        let style = {
+                                            fontSize: this.props.fontSize
+                                        };
+                                        if (record.done) {
+                                            style = {
+                                                ...style,
+                                                fontStyle: "italic",
+                                                textDecoration: "line-through"
+                                            };
+                                        }
+                                        return <span style={style}>{text}</span>;
+                                    }
+                                },
+                                {
+                                    title: "Done",
+                                    dataIndex: "done",
+                                    key: "done",
+                                    render: (bool, record) => {
+                                        let cls = "fa " + (bool ? "fa-check text-success" : "fa-times text-danger");
+                                        return <i className={cls} />;
+                                    },
+                                    sorter: (a, b) => {
+                                        let map = {
+                                            true: 0,
+                                            false: 1
+                                        };
+                                        return map[a.done] - map[b.done];
+                                    },
+                                    filters: [
+                                        {
+                                            text: "Done",
+                                            value: true
+                                        },
+                                        {
+                                            text: "Undone",
+                                            value: false
+                                        }
+                                    ],
+                                    onFilter: (value, record) => {
+                                        return record.done === value
+                                    },
+                                    filterMultiple: false
+                                }
+                            ]}
                         />
                     </Col>
                 </Row>
