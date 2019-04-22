@@ -18,9 +18,9 @@ class Controller extends Component {
             trivial: 3
         };
         this.state = {
+            fontSize: 20,
             gridColumns: 3,
             currentBoard: "default0",
-            currentDraft: "",
             boards: {
                 default0: {
                     items: [
@@ -30,7 +30,8 @@ class Controller extends Component {
                             done: false
                         }
                     ],
-                    note: "nota 0"
+                    description:
+                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
                 },
                 default1: {
                     items: [
@@ -40,17 +41,13 @@ class Controller extends Component {
                             done: true
                         }
                     ],
-                    note: "nota 1"
+                    created_date: new Date(),
+                    description: "nota 1"
                 },
                 default2: {
-                    items: [
-                        {
-                            text: "First default item",
-                            priority: "critical",
-                            done: false
-                        }
-                    ],
-                    note: "nota 2"
+                    items: [],
+                    created_date: new Date(),
+                    description: "nota 2"
                 },
                 default3: {
                     items: [
@@ -59,47 +56,8 @@ class Controller extends Component {
                             priority: "critical"
                         }
                     ],
-                    note: "nota 3"
-                },
-                default4: {
-                    items: [
-                        {
-                            text: "First default item",
-                            priority: "critical",
-                            done: false
-                        }
-                    ],
-                    note: ""
-                },
-                default5: {
-                    items: [
-                        {
-                            text: "First default item",
-                            priority: "critical",
-                            done: false
-                        }
-                    ],
-                    note: ""
-                },
-                default6: {
-                    items: [
-                        {
-                            text: "First default item",
-                            priority: "critical",
-                            done: false
-                        }
-                    ],
-                    note: ""
-                },
-                default7: {
-                    items: [
-                        {
-                            text: "First default item",
-                            priority: "critical",
-                            done: false
-                        }
-                    ],
-                    note: ""
+                    created_date: new Date(),
+                    description: "nota 3"
                 }
             }
         };
@@ -151,6 +109,9 @@ class Controller extends Component {
     onColSliderChange = newVal => {
         this.setState({ gridColumns: newVal });
     };
+    changeFontSize = val => {
+        this.setState({ fontSize: val });
+    };
 
     render() {
         // create a route "/board/:boardName" for every board
@@ -164,6 +125,8 @@ class Controller extends Component {
                         title={board}
                         board={this.getBoardClone(board)}
                         addItemToBoard={this.addItemToBoard}
+                        fontSize={this.state.fontSize}
+                        changeFontSize={this.changeFontSize}
                     />
                 )}
             />
