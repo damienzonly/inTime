@@ -3,7 +3,8 @@ import _ from "lodash";
 import { Layout } from "antd";
 import Navbar from "./Navbar";
 import Lists from "./Lists";
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import Board from "./Board";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import "antd/dist/antd.css";
 const { Content, Sider } = Layout;
 
@@ -17,11 +18,10 @@ class Controller extends Component {
             trivial: 3
         };
         this.state = {
-            isSidebarCollapsed: false,
             gridColumns: 3,
-            currentList: "default",
+            currentBoard: "default0",
             currentDraft: "",
-            lists: {
+            boards: {
                 default0: {
                     items: [
                         {
@@ -29,7 +29,7 @@ class Controller extends Component {
                             priority: "critical"
                         }
                     ],
-                    note: ""
+                    note: "nota 0"
                 },
                 default1: {
                     items: [
@@ -38,7 +38,7 @@ class Controller extends Component {
                             priority: "critical"
                         }
                     ],
-                    note: ""
+                    note: "nota 1"
                 },
                 default2: {
                     items: [
@@ -47,7 +47,7 @@ class Controller extends Component {
                             priority: "critical"
                         }
                     ],
-                    note: ""
+                    note: "nota 2"
                 },
                 default3: {
                     items: [
@@ -56,7 +56,7 @@ class Controller extends Component {
                             priority: "critical"
                         }
                     ],
-                    note: ""
+                    note: "nota 3"
                 },
                 default4: {
                     items: [
@@ -93,24 +93,6 @@ class Controller extends Component {
                         }
                     ],
                     note: ""
-                },
-                default8: {
-                    items: [
-                        {
-                            text: "First default item",
-                            priority: "critical"
-                        }
-                    ],
-                    note: ""
-                },
-                default9: {
-                    items: [
-                        {
-                            text: "First default item",
-                            priority: "critical"
-                        }
-                    ],
-                    note: ""
                 }
             }
         };
@@ -124,7 +106,7 @@ class Controller extends Component {
         // disable invalid inputs
         if (typeof priority !== "string") priority = this.getPriorityByCode(priority);
         if (typeof text === "string") {
-            let oldList = this.getList(list);
+            let oldList = this.getBoard(list);
             this.setState(state => {
                 return {
                     lists: {
@@ -140,10 +122,10 @@ class Controller extends Component {
         }
     };
 
-    getList = (list = this.state.currentList) => {
-        if (list.match(/^\s*$/)) return;
-        if (this.state.lists.hasOwnProperty(list)) return this.state.lists[list];
-        throw Error(`List doesn't exist: "${list}"`);
+    getBoard = (boardName = this.state.currentBoard) => {
+        if (boardName.match(/^\s*$/)) return;
+        if (this.state.boards.hasOwnProperty(boardName)) return this.state.boards[boardName];
+        throw Error(`List doesn't exist: "${boardName}"`);
     };
 
     getPrioritybyName = name => {
@@ -159,12 +141,25 @@ class Controller extends Component {
         throw Error(`Priority with value "${value}" not found`);
     };
 
+    onColSliderChange = newVal => {
+        this.setState({ gridColumns: newVal });
+    };
+
     render() {
+        // create a route "/board/:boardName" for every board
+        let routes = Object.keys(this.state.boards).map((board, index) => (
+            <Route
+                key={index}
+                path={`/board/${board}`}
+                component={props => <Board {...props} title={board} board={this.getBoard(board)} />}
+            />
+        ));
         return (
             <>
                 <Router>
-                    <Layout style={{ minHeight: "100vh" }}>
+                    <Layout>
                         <Sider
+                            width="20vw"
                             collapsible
                             collapsed={this.state.isSidebarCollapsed}
                             onCollapse={() => {
@@ -175,17 +170,20 @@ class Controller extends Component {
                                 });
                             }}
                         >
-                            <Navbar />
+                            <Navbar lists={this.state.boards} />
                         </Sider>
                         <Layout>
                             <Content>
-                                <Route
-                                    exact
-                                    path="/"
-                                    render={() => (
-                                        <Lists lists={this.state.lists} COLS_NUMBER={this.state.gridColumns} />
-                                    )}
-                                />
+                                <Switch>
+                                    <Route
+                                        exact
+                                        path="/"
+                                        component={() => (
+                                            <Lists onColSliderChange={this.onColSliderChange} columns={this.state.gridColumns} lists={this.state.boards} COLS_NUMBER={this.state.gridColumns} />
+                                        )}
+                                    />
+                                    {routes}
+                                </Switch>
                             </Content>
                         </Layout>
                     </Layout>
