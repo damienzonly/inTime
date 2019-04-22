@@ -6,7 +6,12 @@ import Boards from "./Boards";
 import Board from "./Board";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import "antd/dist/antd.css";
+import ls from "local-storage";
+
 const { Content, Sider } = Layout;
+const SAVE_STATE_INTERVAL = 2000;
+const LOCAL_STORAGE_KEY = "todo_app_state";
+
 
 class Controller extends Component {
     constructor(props) {
@@ -81,6 +86,10 @@ class Controller extends Component {
                 }
             }
         };
+        if (ls(LOCAL_STORAGE_KEY)) this.state = ls(LOCAL_STORAGE_KEY);
+        this.saveStateInterval = setInterval(() => {
+            this.saveStateToLocalStorage();
+        }, SAVE_STATE_INTERVAL);
     }
     /**
      * Adds an item to the list with priority
@@ -107,6 +116,10 @@ class Controller extends Component {
         }
     };
 
+
+    saveStateToLocalStorage = ()=> {
+        ls.set(LOCAL_STORAGE_KEY, this.state);
+    }
     getBoardClone = (boardName = this.state.currentBoard) => {
         if (boardName.match(/^\s*$/)) return;
         if (this.state.boards.hasOwnProperty(boardName)) return _.cloneDeep(this.state.boards[boardName]);
