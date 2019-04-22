@@ -1,13 +1,17 @@
 import React, { Component } from "react";
-import { Row, Col, Input, Breadcrumb, List, Slider } from "antd";
+import { Row, Col, Input, Breadcrumb, List, Slider, Select } from "antd";
+
 export default class Board extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            currentDraft: ""
+            currentDraft: "",
+            currentPriority: "critical"
         };
     }
-
+    changePriority = p => {
+        this.setState({ currentPriority: p });
+    };
     render() {
         let spacing = {
             span: 12,
@@ -16,10 +20,8 @@ export default class Board extends Component {
         return (
             <>
                 <Row>
-                    <Col {...spacing} style={{marginTop:30}}>
-                    <h3>
-                        Font size
-                    </h3>
+                    <Col {...spacing} style={{ marginTop: 30 }}>
+                        <h3>Font size</h3>
                         <Slider
                             min={15}
                             max={50}
@@ -61,6 +63,18 @@ export default class Board extends Component {
                         <div style={{ textAlign: "center" }}>
                             <Input
                                 allowClear
+                                addonAfter={
+                                    <Select
+                                        style={{ width: 150 }}
+                                        defaultValue="critical"
+                                        onChange={option => this.setState({ currentPriority: option })}
+                                    >
+                                        <Select.Option value="critical"> Critical </Select.Option>
+                                        <Select.Option value="major"> Major </Select.Option>
+                                        <Select.Option value="minor"> Minor </Select.Option>
+                                        <Select.Option value="trivial"> Trivial </Select.Option>
+                                    </Select>
+                                }
                                 value={this.state.currentDraft}
                                 size="large"
                                 placeholder="Add item..."
@@ -68,7 +82,7 @@ export default class Board extends Component {
                                 onPressEnter={e => {
                                     e.preventDefault();
                                     let nextItem = e.target.value;
-                                    this.props.addItemToBoard(nextItem, this.props.title);
+                                    this.props.addItemToBoard(nextItem, this.props.title, this.state.currentPriority);
                                     this.setState({
                                         currentDraft: ""
                                     });
