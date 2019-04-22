@@ -1,17 +1,23 @@
 import React, { Component } from "react";
 import { Row, Col, Card } from "antd";
 
-const COLS_NUMBER = 3;
-
 export default class Lists extends Component {
     render() {
+        const COLS_NUMBER = this.props.COLS_NUMBER || 3;
         let lists = Object.keys(this.props.lists);
         let rows = [];
         let cols = [];
         for (let [index, item] of lists.entries()) {
             // continue to append
             let newCard = (
-                <Card title={item} style={{ width: 200 }}>
+                <Card
+                    title={item}
+                    style={{
+                        marginLeft: "auto",
+                        marginRight: "auto",
+                        width: 300
+                    }}
+                >
                     oggetti dentro
                 </Card>
             );
@@ -22,8 +28,7 @@ export default class Lists extends Component {
                     span={Math.floor(24 / COLS_NUMBER)}
                     key={index}
                     style={{
-                        padding: "2%",
-                        border: "1px solid red"
+                        padding: "2%"
                     }}
                 >
                     {newCard}
@@ -31,12 +36,7 @@ export default class Lists extends Component {
             ];
             if (cols.length === COLS_NUMBER || index === lists.length - 1) {
                 // close the row
-                rows = [
-                    ...rows,
-                    <Row key={rows.length}>
-                        {cols}
-                    </Row>
-                ];
+                rows = [...rows, <Row key={rows.length}>{cols}</Row>];
                 cols = [];
             }
         }

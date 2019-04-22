@@ -3,8 +3,9 @@ import _ from "lodash";
 import { Layout } from "antd";
 import Navbar from "./Navbar";
 import Lists from "./Lists";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import "antd/dist/antd.css";
-const { Header, Content } = Layout;
+const { Content, Sider } = Layout;
 
 class Controller extends Component {
     constructor(props) {
@@ -16,6 +17,8 @@ class Controller extends Component {
             trivial: 3
         };
         this.state = {
+            isSidebarCollapsed: false,
+            gridColumns: 3,
             currentList: "default",
             currentDraft: "",
             lists: {
@@ -159,14 +162,34 @@ class Controller extends Component {
     render() {
         return (
             <>
-                <Layout className="layout">
-                    <Header>
-                        <Navbar />
-                    </Header>
-                    <Content>
-                        <Lists lists={this.state.lists} />
-                    </Content>
-                </Layout>
+                <Router>
+                    <Layout style={{ minHeight: "100vh" }}>
+                        <Sider
+                            collapsible
+                            collapsed={this.state.isSidebarCollapsed}
+                            onCollapse={() => {
+                                this.setState(state => {
+                                    return {
+                                        isSidebarCollapsed: !state.isSidebarCollapsed
+                                    };
+                                });
+                            }}
+                        >
+                            <Navbar />
+                        </Sider>
+                        <Layout>
+                            <Content>
+                                <Route
+                                    exact
+                                    path="/"
+                                    render={() => (
+                                        <Lists lists={this.state.lists} COLS_NUMBER={this.state.gridColumns} />
+                                    )}
+                                />
+                            </Content>
+                        </Layout>
+                    </Layout>
+                </Router>
             </>
         );
     }
