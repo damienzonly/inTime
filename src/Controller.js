@@ -20,7 +20,6 @@ class Controller extends Component {
         this.state = {
             fontSize: 20,
             gridColumns: 3,
-            currentBoard: "default0",
             boards: {
                 default0: {
                     items: [
@@ -114,23 +113,6 @@ class Controller extends Component {
     };
 
     render() {
-        // create a route "/board/:boardName" for every board
-        let routes = Object.keys(this.state.boards).map((board, index) => (
-            <Route
-                key={index}
-                path={`/board/${board}`}
-                render={props => (
-                    <Board
-                        {...props}
-                        title={board}
-                        board={this.getBoardClone(board)}
-                        addItemToBoard={this.addItemToBoard}
-                        fontSize={this.state.fontSize}
-                        changeFontSize={this.changeFontSize}
-                    />
-                )}
-            />
-        ));
         return (
             <>
                 <Router>
@@ -163,7 +145,19 @@ class Controller extends Component {
                                             />
                                         )}
                                     />
-                                    {routes}
+                                    <Route
+                                        path="/board/:boardName"
+                                        render={props => (
+                                            <Board
+                                                {...props}
+                                                title={props.match.params.boardName}
+                                                board={this.getBoardClone(props.match.params.boardName)}
+                                                addItemToBoard={this.addItemToBoard}
+                                                fontSize={this.state.fontSize}
+                                                changeFontSize={this.changeFontSize}
+                                            />
+                                        )}
+                                    />
                                 </Switch>
                             </Content>
                         </Layout>
