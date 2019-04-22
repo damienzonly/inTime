@@ -18,15 +18,34 @@ class Controller extends Component {
             trivial: 3
         };
         this.state = {
-            fontSize: 20,
+            fontSize: 15,
             gridColumns: 3,
             boards: {
                 default0: {
                     items: [
                         {
-                            text: "First default item",
+                            text: "Text 1",
                             priority: "critical",
-                            done: false
+                            done: false,
+                            created: new Date()
+                        },
+                        {
+                            text: "Long text 2",
+                            priority: "major",
+                            done: false,
+                            created: new Date()
+                        },
+                        {
+                            text: "First default item ".repeat(10),
+                            priority: "minor",
+                            done: false,
+                            created: new Date()
+                        },
+                        {
+                            text: "First default item",
+                            priority: "trivial",
+                            done: true,
+                            created: new Date()
                         }
                     ],
                     description:
@@ -37,7 +56,8 @@ class Controller extends Component {
                         {
                             text: "First default item",
                             priority: "critical",
-                            done: true
+                            done: true,
+                            created: new Date()
                         }
                     ],
                     created_date: new Date(),
@@ -52,7 +72,8 @@ class Controller extends Component {
                     items: [
                         {
                             text: "First default item",
-                            priority: "critical"
+                            priority: "critical",
+                            done: false
                         }
                     ],
                     created_date: new Date(),
@@ -72,7 +93,7 @@ class Controller extends Component {
         if (text.match(/^\s*$/)) return;
         if (typeof text === "string") {
             let oldBoard = this.getBoardClone(boardName);
-            oldBoard.items.push({ text, priority, done: false });
+            oldBoard.items = [{ text, priority, done: false }, ...oldBoard.items];
             this.setState(state => {
                 return {
                     boards: {
