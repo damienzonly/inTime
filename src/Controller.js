@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import _ from "lodash";
 import { Layout } from "antd";
 import Navbar from "./Navbar";
-import Lists from "./Lists";
+import Boards from "./Boards";
 import Board from "./Board";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import "antd/dist/antd.css";
@@ -26,7 +26,8 @@ class Controller extends Component {
                     items: [
                         {
                             text: "First default item",
-                            priority: "critical"
+                            priority: "critical",
+                            done: false
                         }
                     ],
                     note: "nota 0"
@@ -35,7 +36,8 @@ class Controller extends Component {
                     items: [
                         {
                             text: "First default item",
-                            priority: "critical"
+                            priority: "critical",
+                            done: true
                         }
                     ],
                     note: "nota 1"
@@ -44,7 +46,8 @@ class Controller extends Component {
                     items: [
                         {
                             text: "First default item",
-                            priority: "critical"
+                            priority: "critical",
+                            done: false
                         }
                     ],
                     note: "nota 2"
@@ -62,7 +65,8 @@ class Controller extends Component {
                     items: [
                         {
                             text: "First default item",
-                            priority: "critical"
+                            priority: "critical",
+                            done: false
                         }
                     ],
                     note: ""
@@ -71,7 +75,8 @@ class Controller extends Component {
                     items: [
                         {
                             text: "First default item",
-                            priority: "critical"
+                            priority: "critical",
+                            done: false
                         }
                     ],
                     note: ""
@@ -80,7 +85,8 @@ class Controller extends Component {
                     items: [
                         {
                             text: "First default item",
-                            priority: "critical"
+                            priority: "critical",
+                            done: false
                         }
                     ],
                     note: ""
@@ -89,7 +95,8 @@ class Controller extends Component {
                     items: [
                         {
                             text: "First default item",
-                            priority: "critical"
+                            priority: "critical",
+                            done: false
                         }
                     ],
                     note: ""
@@ -100,20 +107,20 @@ class Controller extends Component {
     /**
      * Adds an item to the list with priority
      * @param {string} text Item text
-     * @param {string} list list object where Item belongs to
+     * @param {string} boardName list object where Item belongs to
      */
-    addItemToList = (text, list, priority = "critical") => {
+    addItemToBoard = (text, boardName, priority = "critical") => {
         // disable invalid inputs
         if (typeof priority !== "string") priority = this.getPriorityByCode(priority);
+        if (text.match(/^\s*$/)) return;
         if (typeof text === "string") {
-            let oldList = this.getBoard(list);
+            let oldBoard = this.getBoardClone(boardName);
+            oldBoard.items.push({ text, priority, done: false });
             this.setState(state => {
                 return {
-                    lists: {
-                        ...state.lists,
-                        [list]: {
-                            items: [...oldList.items, { text, priority }]
-                        }
+                    boards: {
+                        ...state.boards,
+                        [boardName]: oldBoard
                     }
                 };
             });
@@ -122,9 +129,9 @@ class Controller extends Component {
         }
     };
 
-    getBoard = (boardName = this.state.currentBoard) => {
+    getBoardClone = (boardName = this.state.currentBoard) => {
         if (boardName.match(/^\s*$/)) return;
-        if (this.state.boards.hasOwnProperty(boardName)) return this.state.boards[boardName];
+        if (this.state.boards.hasOwnProperty(boardName)) return _.cloneDeep(this.state.boards[boardName]);
         throw Error(`List doesn't exist: "${boardName}"`);
     };
 
@@ -151,7 +158,14 @@ class Controller extends Component {
             <Route
                 key={index}
                 path={`/board/${board}`}
-                component={props => <Board {...props} title={board} board={this.getBoard(board)} />}
+                render={props => (
+                    <Board
+                        {...props}
+                        title={board}
+                        board={this.getBoardClone(board)}
+                        addItemToBoard={this.addItemToBoard}
+                    />
+                )}
             />
         ));
         return (
@@ -170,7 +184,7 @@ class Controller extends Component {
                                 });
                             }}
                         >
-                            <Navbar lists={this.state.boards} />
+                            <Navbar boards={this.state.boards} />
                         </Sider>
                         <Layout>
                             <Content>
@@ -179,7 +193,11 @@ class Controller extends Component {
                                         exact
                                         path="/"
                                         component={() => (
-                                            <Lists onColSliderChange={this.onColSliderChange} columns={this.state.gridColumns} lists={this.state.boards} COLS_NUMBER={this.state.gridColumns} />
+                                            <Boards
+                                                onColSliderChange={this.onColSliderChange}
+                                                columns={this.state.gridColumns}
+                                                boards={this.state.boards}
+                                            />
                                         )}
                                     />
                                     {routes}
