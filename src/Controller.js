@@ -163,6 +163,7 @@ class Controller extends Component {
                                                 onColSliderChange={this.onColSliderChange}
                                                 columns={this.state.gridColumns}
                                                 boards={this.state.boards}
+                                                getBoardClone={this.getBoardClone}
                                             />
                                         )}
                                     />
