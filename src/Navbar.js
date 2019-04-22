@@ -18,7 +18,7 @@ export default class Navbar extends Component {
         });
     };
     render = () => {
-        let listsMenu = Object.keys(this.props.lists).map((item, index) => {
+        let boardsMenu = Object.keys(this.props.boards).map((item, index) => {
             let url = `/board/${item}`;
             return (
                 <Menu.Item key={"list-" + index}>
@@ -28,10 +28,10 @@ export default class Navbar extends Component {
             );
         });
         let subMenu;
-        if (listsMenu) {
+        if (boardsMenu) {
             subMenu = (
-                <SubMenu key="2" title="Your lists">
-                    {listsMenu}
+                <SubMenu key="2" title="Your boards">
+                    {boardsMenu}
                 </SubMenu>
             );
         }
