@@ -19,7 +19,7 @@ class Controller extends Component {
             currentList: "default",
             currentDraft: "",
             lists: {
-                default: {
+                default0: {
                     items: [
                         {
                             text: "First default item",
@@ -65,6 +65,42 @@ class Controller extends Component {
                     note: ""
                 },
                 default5: {
+                    items: [
+                        {
+                            text: "First default item",
+                            priority: "critical"
+                        }
+                    ],
+                    note: ""
+                },
+                default6: {
+                    items: [
+                        {
+                            text: "First default item",
+                            priority: "critical"
+                        }
+                    ],
+                    note: ""
+                },
+                default7: {
+                    items: [
+                        {
+                            text: "First default item",
+                            priority: "critical"
+                        }
+                    ],
+                    note: ""
+                },
+                default8: {
+                    items: [
+                        {
+                            text: "First default item",
+                            priority: "critical"
+                        }
+                    ],
+                    note: ""
+                },
+                default9: {
                     items: [
                         {
                             text: "First default item",
@@ -121,7 +157,6 @@ class Controller extends Component {
     };
 
     render() {
-        
         return (
             <>
                 <Layout className="layout">
