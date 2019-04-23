@@ -63,7 +63,7 @@ export default class Board extends Component {
 
                 <Row>
                     <Col {...spacing} style={{ marginTop: 20 }}>
-                        <div>{this.props.board.description}</div>
+                        <div>{this.props.board.description.capFirst()}</div>
                     </Col>
                 </Row>
 

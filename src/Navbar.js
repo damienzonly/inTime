@@ -22,7 +22,7 @@ export default class Navbar extends Component {
             let url = `/board/${item}`;
             return (
                 <Menu.Item key={"list-" + index}>
-                    {item}
+                    {item.capFirst()}
                     <Link to={url} />
                 </Menu.Item>
             );
@@ -35,9 +35,7 @@ export default class Navbar extends Component {
                     title={
                         <span>
                             <Icon type="form" />
-                            <span>
-                                Your Boards
-                            </span>
+                            <span>Your Boards</span>
                         </span>
                     }
                 >
