@@ -1,12 +1,13 @@
 import React, { Component } from "react";
-import { Row, Col, Card, Slider, List, Tag } from "antd";
+import { Link } from "react-router-dom";
+import { Row, Col, Card, Slider, List, Tag, Divider } from "antd";
 
 export default class Boards extends Component {
     constructor(props) {
         super(props);
         this.marks = {
             ...[1, 2, 3, 4].map((item, index) => {
-                return { [index + 1]: item };
+                return { [item]: item };
             })
         };
     }
@@ -15,8 +16,8 @@ export default class Boards extends Component {
         let rows = [];
         let cols = [];
         for (let [index, boardName] of boards.entries()) {
-            let items = this.props.getBoardClone(boardName).items.slice(0, 11);
-            // continue to append
+            let items = this.props.getBoardClone(boardName).items.slice(0, 10);
+
             let color = {
                 critical: "volcano",
                 major: "orange",
@@ -25,24 +26,31 @@ export default class Boards extends Component {
             };
             let newCard = (
                 <Card
-                    title={boardName}
+                    title={
+                        <div style={{ width: "auto", height: "auto" }}>
+                            <Link to={`/board/${boardName}`}>{boardName.capFirst()}</Link>
+                        </div>
+                    }
                     style={{
                         marginLeft: "auto",
                         marginRight: "auto",
-                        width: 300,
+                        width: "auto",
+                        maxWidth: 800,
                         height: 400,
                         overflow: "auto"
                     }}
                 >
                     <List
-                        split={false}
                         size="large"
                         dataSource={items}
                         renderItem={item => (
                             <List.Item>
                                 <span>
                                     <Tag color={color[item.priority]}>{item.priority.toUpperCase()}</Tag>
-                                    <span>{item.text}</span>
+                                </span>
+                                <Divider type="vertical" />
+                                <span style={item.done ? { fontStyle: "italic", textDecoration: "line-through" } : {}}>
+                                    {item.text.capFirst()}
                                 </span>
                             </List.Item>
                         )}
@@ -55,7 +63,8 @@ export default class Boards extends Component {
                     span={Math.floor(24 / this.props.columns)}
                     key={index}
                     style={{
-                        padding: "2%"
+                        padding: "2%",
+                        minWidth: 400
                     }}
                 >
                     {newCard}
