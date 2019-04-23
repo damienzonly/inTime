@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { Row, Col, Input, Breadcrumb, Slider, Select, Table, Tag, Button, message } from "antd";
-
+import { Link } from "react-router-dom";
 message.config({
     duration: 3,
-    maxCount: 8
+    maxCount: 3
 });
 
 export default class Board extends Component {
@@ -16,6 +16,10 @@ export default class Board extends Component {
     }
     changePriority = p => {
         this.setState({ currentPriority: p });
+    };
+    addItemToBoard = () => {
+        this.props.addItemToBoard(this.state.currentDraft, this.props.boardName, this.state.currentPriority);
+        this.setState({ currentDraft: "" });
     };
     render() {
         let spacing = {
@@ -49,8 +53,10 @@ export default class Board extends Component {
                 <Row>
                     <Col {...spacing}>
                         <Breadcrumb separator="/" style={{ marginTop: "60px" }}>
-                            <Breadcrumb.Item>Boards</Breadcrumb.Item>
-                            <Breadcrumb.Item>{this.props.boardName}</Breadcrumb.Item>
+                            <Breadcrumb.Item>
+                                <Link to="/">Boards</Link>
+                            </Breadcrumb.Item>
+                            <Breadcrumb.Item>{this.props.boardName.capFirst()}</Breadcrumb.Item>
                         </Breadcrumb>
                     </Col>
                 </Row>
@@ -71,7 +77,7 @@ export default class Board extends Component {
                         <div style={{ textAlign: "center" }}>
                             <Input
                                 allowClear
-                                addonAfter={
+                                addonBefore={
                                     <Select
                                         style={{ width: 150 }}
                                         defaultValue="critical"
@@ -83,21 +89,23 @@ export default class Board extends Component {
                                         <Select.Option value="trivial"> Trivial </Select.Option>
                                     </Select>
                                 }
+                                addonAfter={
+                                    <i
+                                        className="fa fa-plus main-color palette-volcano-5"
+                                        style={{ width: 50, cursor: "pointer" }}
+                                        onClick={e => {
+                                            e.preventDefault();
+                                            this.addItemToBoard();
+                                        }}
+                                    />
+                                }
                                 value={this.state.currentDraft}
                                 size="large"
                                 placeholder="Add item..."
                                 onChange={e => this.setState({ currentDraft: e.target.value })}
                                 onPressEnter={e => {
                                     e.preventDefault();
-                                    let nextItem = e.target.value;
-                                    this.props.addItemToBoard(
-                                        nextItem,
-                                        this.props.boardName,
-                                        this.state.currentPriority
-                                    );
-                                    this.setState({
-                                        currentDraft: ""
-                                    });
+                                    this.addItemToBoard();
                                 }}
                             />
                         </div>
@@ -176,7 +184,7 @@ export default class Board extends Component {
                                                 textDecoration: "line-through"
                                             };
                                         }
-                                        return <span style={style}>{text}</span>;
+                                        return <span style={style}>{text.capFirst()}</span>;
                                     }
                                 },
                                 {
