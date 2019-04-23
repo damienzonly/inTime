@@ -1,5 +1,10 @@
 import React, { Component } from "react";
-import { Row, Col, Input, Breadcrumb, Slider, Select, Table, Tag } from "antd";
+import { Row, Col, Input, Breadcrumb, Slider, Select, Table, Tag, Button, message } from "antd";
+
+message.config({
+    duration: 3,
+    maxCount: 8
+});
 
 export default class Board extends Component {
     constructor(props) {
@@ -45,7 +50,7 @@ export default class Board extends Component {
                     <Col {...spacing}>
                         <Breadcrumb separator="/" style={{ marginTop: "60px" }}>
                             <Breadcrumb.Item>Boards</Breadcrumb.Item>
-                            <Breadcrumb.Item>{this.props.title}</Breadcrumb.Item>
+                            <Breadcrumb.Item>{this.props.boardName}</Breadcrumb.Item>
                         </Breadcrumb>
                     </Col>
                 </Row>
@@ -85,7 +90,11 @@ export default class Board extends Component {
                                 onPressEnter={e => {
                                     e.preventDefault();
                                     let nextItem = e.target.value;
-                                    this.props.addItemToBoard(nextItem, this.props.title, this.state.currentPriority);
+                                    this.props.addItemToBoard(
+                                        nextItem,
+                                        this.props.boardName,
+                                        this.state.currentPriority
+                                    );
                                     this.setState({
                                         currentDraft: ""
                                     });
@@ -96,20 +105,13 @@ export default class Board extends Component {
                 </Row>
 
                 <Row>
-                    <Col
-                        {...spacing}
-                        style={{
-                            marginBottom: 150
-                        }}
-                    >
+                    <Col {...spacing} style={{ marginBottom: 150 }}>
                         <Table
                             style={{
                                 marginTop: 30
                             }}
                             size="large"
-                            dataSource={this.props.board.items.map((item, index) => {
-                                return { ...item, key: index };
-                            })}
+                            dataSource={this.props.board.items}
                             columns={[
                                 {
                                     title: "Priority",
@@ -203,9 +205,29 @@ export default class Board extends Component {
                                         }
                                     ],
                                     onFilter: (value, record) => {
-                                        return record.done === value
+                                        return record.done === value;
                                     },
                                     filterMultiple: false
+                                },
+                                {
+                                    title: "Control",
+                                    dataIndex: "key",
+                                    key: "key",
+                                    render: (key, record) => {
+                                        return (
+                                            <Button
+                                                type="danger"
+                                                onClick={() => {
+                                                    this.props
+                                                        .destroyItemFromBoard(key, this.props.boardName)
+                                                        .then(() => message.success("Item deleted"))
+                                                        .catch(err => message.error(err.message));
+                                                }}
+                                            >
+                                                Delete
+                                            </Button>
+                                        );
+                                    }
                                 }
                             ]}
                         />

@@ -11,7 +11,7 @@ import ls from "local-storage";
 const { Content, Sider } = Layout;
 const SAVE_STATE_INTERVAL = 2000;
 const LOCAL_STORAGE_KEY = "todo_app_state";
-
+const AUTOSAVE = false;
 
 class Controller extends Component {
     constructor(props) {
@@ -23,6 +23,7 @@ class Controller extends Component {
             trivial: 3
         };
         this.state = {
+            currentKeyCounter: 5,
             fontSize: 15,
             gridColumns: 3,
             boards: {
@@ -32,25 +33,29 @@ class Controller extends Component {
                             text: "Text 1",
                             priority: "critical",
                             done: false,
-                            created: new Date()
+                            created: new Date(),
+                            key: 0
                         },
                         {
                             text: "Long text 2",
                             priority: "major",
                             done: false,
-                            created: new Date()
+                            created: new Date(),
+                            key: 1
                         },
                         {
                             text: "First default item ".repeat(10),
                             priority: "minor",
                             done: false,
-                            created: new Date()
+                            created: new Date(),
+                            key: 2
                         },
                         {
                             text: "First default item",
                             priority: "trivial",
                             done: true,
-                            created: new Date()
+                            created: new Date(),
+                            key: 3
                         }
                     ],
                     description:
@@ -62,7 +67,8 @@ class Controller extends Component {
                             text: "First default item",
                             priority: "critical",
                             done: true,
-                            created: new Date()
+                            created: new Date(),
+                            key: 4
                         }
                     ],
                     created_date: new Date(),
@@ -78,7 +84,9 @@ class Controller extends Component {
                         {
                             text: "First default item",
                             priority: "critical",
-                            done: false
+                            done: false,
+                            created: new Date(),
+                            key: 5
                         }
                     ],
                     created_date: new Date(),
@@ -88,13 +96,16 @@ class Controller extends Component {
         };
         if (ls(LOCAL_STORAGE_KEY)) this.state = ls(LOCAL_STORAGE_KEY);
         this.saveStateInterval = setInterval(() => {
-            this.saveStateToLocalStorage();
+            if (AUTOSAVE) {
+                this.saveStateToLocalStorage();
+            }
         }, SAVE_STATE_INTERVAL);
     }
     /**
      * Adds an item to the list with priority
      * @param {string} text Item text
      * @param {string} boardName list object where Item belongs to
+     * @param {string} priority list object where Item belongs to
      */
     addItemToBoard = (text, boardName, priority = "critical") => {
         // disable invalid inputs
@@ -102,9 +113,13 @@ class Controller extends Component {
         if (text.match(/^\s*$/)) return;
         if (typeof text === "string") {
             let oldBoard = this.getBoardClone(boardName);
-            oldBoard.items = [{ text, priority, done: false }, ...oldBoard.items];
             this.setState(state => {
+                oldBoard.items = [
+                    { text, priority, done: false, created: new Date(), key: state.currentKeyCounter + 1 },
+                    ...oldBoard.items
+                ];
                 return {
+                    currentKeyCounter: state.currentKeyCounter + 1,
                     boards: {
                         ...state.boards,
                         [boardName]: oldBoard
@@ -116,10 +131,35 @@ class Controller extends Component {
         }
     };
 
+    /**
+     * Removes the item with given key from boardName
+     * @param {number} key
+     * @param {string} boardName
+     */
+    destroyItemFromBoard = async (key, boardName) => {
+        let boardClone = this.getBoardClone(boardName);
+        let keys = boardClone.items.map(item => item.key);
+        let itemKey = keys.indexOf(key);
+        if (itemKey !== -1) {
+            boardClone.items = boardClone.items.filter(item => item.key !== key);
+            this.setState(state => {
+                return {
+                    boards: {
+                        ...state.boards,
+                        [boardName]: boardClone
+                    }
+                };
+            });
+            return;
+        } else {
+            throw Error(`Item not found for key: ${key}`);
+        }
+    };
 
-    saveStateToLocalStorage = ()=> {
+    saveStateToLocalStorage = () => {
         ls.set(LOCAL_STORAGE_KEY, this.state);
-    }
+    };
+
     getBoardClone = (boardName = this.state.currentBoard) => {
         if (boardName.match(/^\s*$/)) return;
         if (this.state.boards.hasOwnProperty(boardName)) return _.cloneDeep(this.state.boards[boardName]);
@@ -142,6 +182,7 @@ class Controller extends Component {
     onColSliderChange = newVal => {
         this.setState({ gridColumns: newVal });
     };
+
     changeFontSize = val => {
         this.setState({ fontSize: val });
     };
@@ -185,11 +226,12 @@ class Controller extends Component {
                                         render={props => (
                                             <Board
                                                 {...props}
-                                                title={props.match.params.boardName}
+                                                boardName={props.match.params.boardName}
                                                 board={this.getBoardClone(props.match.params.boardName)}
                                                 addItemToBoard={this.addItemToBoard}
                                                 fontSize={this.state.fontSize}
                                                 changeFontSize={this.changeFontSize}
+                                                destroyItemFromBoard={this.destroyItemFromBoard}
                                             />
                                         )}
                                     />
