@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Row, Col, Input, Breadcrumb, Slider, Select, Table, Tag, Button, message } from "antd";
+import { Row, Col, Input, Breadcrumb, Slider, Select, Table, Tag, Button, message, Divider } from "antd";
+
 import { Link } from "react-router-dom";
 message.config({
     duration: 3,
@@ -14,18 +15,165 @@ export default class Board extends Component {
             currentPriority: "critical"
         };
     }
+
     changePriority = p => {
         this.setState({ currentPriority: p });
     };
+    
     addItemToBoard = () => {
         this.props.addItemToBoard(this.state.currentDraft, this.props.boardName, this.state.currentPriority);
         this.setState({ currentDraft: "" });
     };
+    
     render() {
         let spacing = {
             span: 12,
             offset: 6
         };
+
+        let priorityColumn = (
+            <Table.Column
+                title="Priority"
+                dataIndex="priority"
+                key="piority"
+                render={(prt, record) => {
+                    let color = {
+                        critical: "volcano",
+                        major: "orange",
+                        minor: "blue",
+                        trivial: "cyan"
+                    }[prt];
+
+                    return (
+                        <Tag color={color} key={record.key}>
+                            {prt.toUpperCase()}
+                        </Tag>
+                    );
+                }}
+                filters={[
+                    {
+                        text: "Critical",
+                        value: "critical"
+                    },
+                    {
+                        text: "Major",
+                        value: "major"
+                    },
+
+                    {
+                        text: "Minor",
+                        value: "minor"
+                    },
+                    {
+                        text: "Trivial",
+                        value: "trivial"
+                    }
+                ]}
+                onFilter={(value, record) => {
+                    return record.priority === value;
+                }}
+                sorter={(a, b) => {
+                    let pts = ["critical", "major", "minor", "trivial"];
+                    let map = {};
+                    pts.map((item, index) => Object.assign(map, { [item]: index }));
+                    return map[a.priority] - map[b.priority];
+                }}
+                sortDirections={["ascend", "descend"]}
+            />
+        );
+
+        let descriptionColumn = (
+            <Table.Column
+                title="Description"
+                dataIndex="text"
+                key="text"
+                render={(text, record) => {
+                    let style = {
+                        fontSize: this.props.fontSize
+                    };
+                    if (record.done) {
+                        style = {
+                            ...style,
+                            fontStyle: "italic",
+                            textDecoration: "line-through"
+                        };
+                    }
+                    return <span style={style}>{text.capFirst()}</span>;
+                }}
+            />
+        );
+
+        let doneColumn = (
+            <Table.Column
+                align="center"
+                title="Done"
+                dataIndex="done"
+                key="done"
+                render={(bool, record) => {
+                    let cls = "fa " + (bool ? "fa-check-circle text-success" : "fa-times-circle text-danger");
+                    return <i className={cls} />;
+                }}
+                sorter={(a, b) => {
+                    let map = {
+                        true: 0,
+                        false: 1
+                    };
+                    return map[a.done] - map[b.done];
+                }}
+                filters={[
+                    {
+                        text: "Done",
+                        value: true
+                    },
+                    {
+                        text: "Undone",
+                        value: false
+                    }
+                ]}
+                onFilter={(value, record) => {
+                    return record.done === value;
+                }}
+                filterMultiple={false}
+            />
+        );
+
+        let controlColumn = (
+            <Table.Column
+                align="center"
+                title="Actions"
+                dataIndex="key"
+                key="key"
+                colSpan={2}
+                render={(key, record) => {
+                    let checkIcon = record.done ? "fa-check-circle" : "fa-check";
+                    return (
+                        <div style={{ minWidth: 150 }}>
+                            <Button
+                                type="success"
+                                onClick={() => {
+                                    this.props.toggleDoneOnItem(key, this.props.boardName);
+                                }}
+                            >
+                                <i className={"fa " + checkIcon} />
+                            </Button>
+                            <Divider type="vertical" />
+                            <Button
+                                type="danger"
+                                onClick={() => {
+                                    this.props
+                                        .destroyItemFromBoard(key, this.props.boardName)
+                                        .then(() => message.success("Item deleted"))
+                                        .catch(err => message.error(err.message));
+                                }}
+                            >
+                                <i className="fa fa-trash" />
+                            </Button>
+                        </div>
+                    );
+                }}
+            />
+        );
+
         return (
             <>
                 <Row>
@@ -120,125 +268,12 @@ export default class Board extends Component {
                             }}
                             size="large"
                             dataSource={this.props.board.items}
-                            columns={[
-                                {
-                                    title: "Priority",
-                                    dataIndex: "priority",
-                                    key: "piority",
-                                    render: (prt, record) => {
-                                        let color = {
-                                            critical: "volcano",
-                                            major: "orange",
-                                            minor: "blue",
-                                            trivial: "cyan"
-                                        }[prt];
-
-                                        return (
-                                            <Tag color={color} key={record.key}>
-                                                {prt.toUpperCase()}
-                                            </Tag>
-                                        );
-                                    },
-                                    filters: [
-                                        {
-                                            text: "Critical",
-                                            value: "critical"
-                                        },
-                                        {
-                                            text: "Major",
-                                            value: "major"
-                                        },
-
-                                        {
-                                            text: "Minor",
-                                            value: "minor"
-                                        },
-                                        {
-                                            text: "Trivial",
-                                            value: "trivial"
-                                        }
-                                    ],
-                                    onFilter: (value, record) => {
-                                        return record.priority === value;
-                                    },
-                                    sorter: (a, b) => {
-                                        let pts = ["critical", "major", "minor", "trivial"];
-                                        let map = {};
-                                        pts.map((item, index) => Object.assign(map, { [item]: index }));
-                                        return map[a.priority] - map[b.priority];
-                                    },
-                                    sortDirections: ["ascend", "descend"]
-                                },
-                                {
-                                    title: "Description",
-                                    dataIndex: "text",
-                                    key: "text",
-                                    render: (text, record) => {
-                                        let style = {
-                                            fontSize: this.props.fontSize
-                                        };
-                                        if (record.done) {
-                                            style = {
-                                                ...style,
-                                                fontStyle: "italic",
-                                                textDecoration: "line-through"
-                                            };
-                                        }
-                                        return <span style={style}>{text.capFirst()}</span>;
-                                    }
-                                },
-                                {
-                                    title: "Done",
-                                    dataIndex: "done",
-                                    key: "done",
-                                    render: (bool, record) => {
-                                        let cls = "fa " + (bool ? "fa-check text-success" : "fa-times text-danger");
-                                        return <i className={cls} />;
-                                    },
-                                    sorter: (a, b) => {
-                                        let map = {
-                                            true: 0,
-                                            false: 1
-                                        };
-                                        return map[a.done] - map[b.done];
-                                    },
-                                    filters: [
-                                        {
-                                            text: "Done",
-                                            value: true
-                                        },
-                                        {
-                                            text: "Undone",
-                                            value: false
-                                        }
-                                    ],
-                                    onFilter: (value, record) => {
-                                        return record.done === value;
-                                    },
-                                    filterMultiple: false
-                                },
-                                {
-                                    title: "Control",
-                                    dataIndex: "key",
-                                    key: "key",
-                                    render: (key, record) => {
-                                        return (
-                                            <Button
-                                                type="danger"
-                                                onClick={() => {
-                                                    this.props
-                                                        .destroyItemFromBoard(key, this.props.boardName)
-                                                        .then(() => message.success("Item deleted"))
-                                                        .catch(err => message.error(err.message));
-                                                }}
-                                            >
-                                                Delete
-                                            </Button>
-                                        );
-                                    }
-                                }
-                            ]}
-                        />
+                        >
+                            {priorityColumn}
+                            {descriptionColumn}
+                            {doneColumn}
+                            {controlColumn}
+                        </Table>
                     </Col>
                 </Row>
             </>

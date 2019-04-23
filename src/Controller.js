@@ -144,6 +144,23 @@ class Controller extends Component {
         }
     };
 
+    toggleDoneOnItem = (key, boardName) => {
+        let nextBoard = this.getBoardClone(boardName);
+        let itemKeys = nextBoard.items.map(item => item.key);
+        let position = itemKeys.indexOf(key);
+        if (position >= 0) {
+            nextBoard.items[position].done = !nextBoard.items[position].done;
+            this.setState(state => {
+                return {
+                    boards: {
+                        ...state.boards,
+                        [boardName]: nextBoard
+                    }
+                };
+            });
+        } else throw Error("Key not found while trying to toggle item");
+    };
+
     saveStateToLocalStorage = () => {
         ls.set(LOCAL_STORAGE_KEY, this.state);
     };
@@ -217,6 +234,7 @@ class Controller extends Component {
                                                 boardName={props.match.params.boardName}
                                                 board={this.getBoardClone(props.match.params.boardName)}
                                                 addItemToBoard={this.addItemToBoard}
+                                                toggleDoneOnItem={this.toggleDoneOnItem}
                                                 fontSize={this.state.fontSize}
                                                 changeFontSize={this.changeFontSize}
                                                 destroyItemFromBoard={this.destroyItemFromBoard}
