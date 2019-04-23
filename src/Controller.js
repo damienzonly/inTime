@@ -25,72 +25,60 @@ class Controller extends Component {
         this.state = {
             currentKeyCounter: 5,
             fontSize: 15,
-            gridColumns: 3,
+            gridColumns: 2,
             boards: {
-                default0: {
+                "shopping list": {
                     items: [
                         {
-                            text: "Text 1",
+                            text: "milk",
                             priority: "critical",
                             done: false,
                             created: new Date(),
                             key: 0
                         },
                         {
-                            text: "Long text 2",
+                            text: "Butter",
                             priority: "major",
                             done: false,
                             created: new Date(),
                             key: 1
                         },
                         {
-                            text: "First default item ".repeat(10),
+                            text: "Oil",
                             priority: "minor",
                             done: false,
                             created: new Date(),
                             key: 2
                         },
                         {
-                            text: "First default item",
+                            text: "Outfit",
                             priority: "trivial",
                             done: true,
                             created: new Date(),
                             key: 3
                         }
                     ],
-                    description:
-                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+                    description: "Discounts @wallmart"
                 },
-                default1: {
+                homeworks: {
                     items: [
                         {
-                            text: "First default item",
-                            priority: "critical",
-                            done: true,
+                            text: "math exercises",
+                            priority: "minor",
+                            done: false,
                             created: new Date(),
                             key: 4
-                        }
-                    ],
-                    created_date: new Date(),
-                    description: "nota 1"
-                },
-                default2: {
-                    items: [],
-                    created_date: new Date(),
-                    description: "nota 2"
-                },
-                default3: {
-                    items: [
+                        },
                         {
-                            text: "First default item",
-                            priority: "critical",
+                            text: "literature reading",
+                            priority: "major",
                             done: false,
                             created: new Date(),
                             key: 5
                         }
                     ],
                     created_date: new Date(),
-                    description: "nota 3"
+                    description: "Boring, but i need to..."
                 }
             }
         };
