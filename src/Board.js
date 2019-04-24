@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Row, Col, Input, Breadcrumb, Slider, Select, Table, Tag, Button, message, Divider } from "antd";
+import { Row, Col, Input, Breadcrumb, Slider, Select, Table, Tag, Button, message, Divider, Tooltip } from "antd";
 
 import { Link } from "react-router-dom";
 message.config({
@@ -19,12 +19,12 @@ export default class Board extends Component {
     changePriority = p => {
         this.setState({ currentPriority: p });
     };
-    
+
     addItemToBoard = () => {
         this.props.addItemToBoard(this.state.currentDraft, this.props.boardName, this.state.currentPriority);
         this.setState({ currentDraft: "" });
     };
-    
+
     render() {
         let spacing = {
             span: 12,
@@ -145,29 +145,34 @@ export default class Board extends Component {
                 key="key"
                 colSpan={2}
                 render={(key, record) => {
-                    let checkIcon = record.done ? "fa-check-circle" : "fa-check";
+                    let checkIcon = record.done ? "fa-check-circle" : "fa-minus";
+                    let tooltip = record.done ? "Uncheck" : "Check";
                     return (
                         <div style={{ minWidth: 150 }}>
-                            <Button
-                                type="success"
-                                onClick={() => {
-                                    this.props.toggleDoneOnItem(key, this.props.boardName);
-                                }}
-                            >
-                                <i className={"fa " + checkIcon} />
-                            </Button>
+                            <Tooltip placement="top" title={tooltip}>
+                                <Button
+                                    type="success"
+                                    onClick={() => {
+                                        this.props.toggleDoneOnItem(key, this.props.boardName);
+                                    }}
+                                >
+                                    <i className={"fa " + checkIcon} />
+                                </Button>
+                            </Tooltip>
                             <Divider type="vertical" />
-                            <Button
-                                type="danger"
-                                onClick={() => {
-                                    this.props
-                                        .destroyItemFromBoard(key, this.props.boardName)
-                                        .then(() => message.success("Item deleted"))
-                                        .catch(err => message.error(err.message));
-                                }}
-                            >
-                                <i className="fa fa-trash" />
-                            </Button>
+                            <Tooltip placement="right" title="Delete">
+                                <Button
+                                    type="danger"
+                                    onClick={() => {
+                                        this.props
+                                            .destroyItemFromBoard(key, this.props.boardName)
+                                            .then(() => message.success("Item deleted"))
+                                            .catch(err => message.error(err.message));
+                                    }}
+                                >
+                                    <i className="fa fa-trash" />
+                                </Button>
+                            </Tooltip>
                         </div>
                     );
                 }}
