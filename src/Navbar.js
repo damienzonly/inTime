@@ -45,13 +45,19 @@ export default class Navbar extends Component {
         }
         return (
             <>
-                <Menu theme="dark" style={{ minHeight: "100vh" }} mode="inline" defaultOpenKeys={["2"]}>
+                <Menu theme="dark" style={{ minHeight: "100vh" }} mode="inline" defaultOpenKeys={[""]}>
                     <Menu.Item key="1">
                         <Icon type="dashboard" />
                         <span> Dashboard </span>
                         <Link to="/" />
                     </Menu.Item>
                     {subMenu}
+                    <Menu.Item>
+                        <Icon type="plus" />
+                        <span> Create new board </span>
+                        <Link to="/board/create" />
+                    </Menu.Item>
+                    
                 </Menu>
             </>
         );

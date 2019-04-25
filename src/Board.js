@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { Row, Col, Input, Breadcrumb, Slider, Select, Table, Tag, Button, message, Divider, Tooltip } from "antd";
-
 import { Link } from "react-router-dom";
 message.config({
     duration: 3,
@@ -51,23 +50,10 @@ export default class Board extends Component {
                     );
                 }}
                 filters={[
-                    {
-                        text: "Critical",
-                        value: "critical"
-                    },
-                    {
-                        text: "Major",
-                        value: "major"
-                    },
-
-                    {
-                        text: "Minor",
-                        value: "minor"
-                    },
-                    {
-                        text: "Trivial",
-                        value: "trivial"
-                    }
+                    { text: "Critical", value: "critical" },
+                    { text: "Major", value: "major" },
+                    { text: "Minor", value: "minor" },
+                    { text: "Trivial", value: "trivial" }
                 ]}
                 onFilter={(value, record) => {
                     return record.priority === value;
@@ -75,6 +61,7 @@ export default class Board extends Component {
                 sorter={(a, b) => {
                     let pts = ["critical", "major", "minor", "trivial"];
                     let map = {};
+                    // set numbered priorities based on array position
                     pts.map((item, index) => Object.assign(map, { [item]: index }));
                     return map[a.priority] - map[b.priority];
                 }}
@@ -178,7 +165,6 @@ export default class Board extends Component {
                 }}
             />
         );
-
         return (
             <>
                 <Row>
@@ -224,7 +210,8 @@ export default class Board extends Component {
                     <Col
                         {...spacing}
                         style={{
-                            marginTop: 80
+                            marginTop: 80,
+                            boxShadow: "0px 0px 100px 0px #ddd"
                         }}
                     >
                         <div style={{ textAlign: "center" }}>
@@ -269,7 +256,8 @@ export default class Board extends Component {
                     <Col {...spacing} style={{ marginBottom: 150 }}>
                         <Table
                             style={{
-                                marginTop: 30
+                                marginTop: 30,
+                                boxShadow: "0px 0px 100px 0px #ddd"
                             }}
                             size="large"
                             dataSource={this.props.board.items}

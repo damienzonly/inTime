@@ -1,12 +1,14 @@
 import React, { Component } from "react";
 import _ from "lodash";
-import { Layout } from "antd";
+import { Layout, message } from "antd";
 import Navbar from "./Navbar";
 import Boards from "./Boards";
 import Board from "./Board";
+import CreateBoard from "./CreateBoard";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import "antd/dist/antd.css";
 import ls from "local-storage";
+import { Redirect } from "react-router-dom";
 
 const { Content, Sider } = Layout;
 const SAVE_STATE_INTERVAL = 2000;
@@ -24,7 +26,7 @@ class Controller extends Component {
         };
         this.state = {
             currentKeyCounter: 5,
-            fontSize: 15,
+            fontSize: 20,
             gridColumns: 2,
             boards: {
                 "shopping list": {
@@ -97,7 +99,6 @@ class Controller extends Component {
      */
     addItemToBoard = (text, boardName, priority = "critical") => {
         // disable invalid inputs
-        if (typeof priority !== "string") priority = this.getPriorityByCode(priority);
         if (text.match(/^\s*$/)) return;
         if (typeof text === "string") {
             let oldBoard = this.getBoardClone(boardName);
@@ -158,30 +159,48 @@ class Controller extends Component {
                     }
                 };
             });
-        } else throw Error("Key not found while trying to toggle item");
+        } else message.error("Key not found while trying to toggle item");
+    };
+
+    createBoard = (boardName, description) => {
+        if (typeof boardName === "string") {
+            if (boardName.length > 0) {
+                if (!this.state.boards.hasOwnProperty(boardName)) {
+                    this.setState(state => {
+                        return {
+                            boards: {
+                                ...state.boards,
+                                [boardName]: {
+                                    items: [],
+                                    description
+                                }
+                            }
+                        };
+                    });
+                    return true;
+                } else {
+                    message.error(`The board "${boardName}" already exists`);
+                }
+            } else message.error("The board name must not be empty");
+        } else message.error("Invalid board name");
+        return false;
     };
 
     saveStateToLocalStorage = () => {
         ls.set(LOCAL_STORAGE_KEY, this.state);
     };
 
-    getBoardClone = (boardName = this.state.currentBoard) => {
-        if (boardName.match(/^\s*$/)) return;
+    getBoardClone = boardName => {
+        if (boardName.match(/^\s*$/)) return null;
         if (this.state.boards.hasOwnProperty(boardName)) return _.cloneDeep(this.state.boards[boardName]);
-        throw Error(`List doesn't exist: "${boardName}"`);
+        message.error(`Board doesn't exist: "${boardName}"`);
+        return null;
     };
 
     getPrioritybyName = name => {
         if (typeof name !== "string") return;
         if (this.priorities.hasOwnProperty(name)) return this.priorities[name];
-        throw Error(`Priority with name "${name}" not found`);
-    };
-
-    getPriorityByCode = value => {
-        if (typeof value !== "number") return;
-        let inverted = _.invert(this.priorities);
-        if (inverted.hasOwnProperty(value)) return inverted[value];
-        throw Error(`Priority with value "${value}" not found`);
+        message.error(`Priority with name "${name}" not found`);
     };
 
     onColSliderChange = newVal => {
@@ -198,7 +217,6 @@ class Controller extends Component {
                 <Router>
                     <Layout>
                         <Sider
-                            width="20vw"
                             collapsible
                             collapsed={this.state.isSidebarCollapsed}
                             onCollapse={() => {
@@ -227,6 +245,11 @@ class Controller extends Component {
                                         )}
                                     />
                                     <Route
+                                        exact
+                                        path="/board/create"
+                                        render={(props) => <CreateBoard {...props} createBoard={this.createBoard} />}
+                                    />
+                                    <Route
                                         path="/board/:boardName"
                                         render={props => (
                                             <Board
@@ -241,6 +264,7 @@ class Controller extends Component {
                                             />
                                         )}
                                     />
+                                    <Route path="*" render={() => <Redirect to="/" />} />
                                 </Switch>
                             </Content>
                         </Layout>

@@ -37,7 +37,8 @@ export default class Boards extends Component {
                         width: "auto",
                         maxWidth: 800,
                         height: 400,
-                        overflow: "auto"
+                        overflow: "auto",
+                        boxShadow: "0px 0px 100px 0px #ddd"
                     }}
                 >
                     <List
@@ -49,7 +50,13 @@ export default class Boards extends Component {
                                     <Tag color={color[item.priority]}>{item.priority.toUpperCase()}</Tag>
                                 </span>
                                 <Divider type="vertical" />
-                                <span style={item.done ? { fontStyle: "italic", textDecoration: "line-through" } : {}}>
+                                <span
+                                    style={
+                                        item.done
+                                            ? { fontStyle: "italic", textDecoration: "line-through" }
+                                            : {}
+                                    }
+                                >
                                     {item.text.capFirst()}
                                 </span>
                             </List.Item>
