@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Row, Col, Input, Breadcrumb, Slider, Select, Table, Tag, Button, message, Divider, Tooltip } from "antd";
+import { Row, Col, Input, Breadcrumb, Slider, Select, Table, Tag, Button, message, Divider, Tooltip, Icon } from "antd";
 import { Link } from "react-router-dom";
 message.config({
     duration: 3,
@@ -96,8 +96,8 @@ export default class Board extends Component {
                 title="Done"
                 dataIndex="done"
                 key="done"
-                render={(bool, record) => {
-                    let cls = "fa " + (bool ? "fa-check-circle text-success" : "fa-times-circle text-danger");
+                render={(done, record) => {
+                    let cls = "fa " + (done ? "fa-times-circle text-danger" : "fa-check-circle text-success");
                     return <i className={cls} />;
                 }}
                 sorter={(a, b) => {
@@ -147,7 +147,7 @@ export default class Board extends Component {
                                 </Button>
                             </Tooltip>
                             <Divider type="vertical" />
-                            <Tooltip placement="right" title="Delete">
+                            <Tooltip placement="top" title="Delete">
                                 <Button
                                     type="danger"
                                     onClick={() => {
@@ -229,16 +229,7 @@ export default class Board extends Component {
                                         <Select.Option value="trivial"> Trivial </Select.Option>
                                     </Select>
                                 }
-                                addonAfter={
-                                    <i
-                                        className="fa fa-plus main-color palette-volcano-5"
-                                        style={{ width: 50, cursor: "pointer" }}
-                                        onClick={e => {
-                                            e.preventDefault();
-                                            this.addItemToBoard();
-                                        }}
-                                    />
-                                }
+                                addonAfter={<Icon type="plus" onClick={this.addItemToBoard} />}
                                 value={this.state.currentDraft}
                                 size="large"
                                 placeholder="Add item..."

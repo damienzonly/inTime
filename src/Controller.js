@@ -5,10 +5,9 @@ import Navbar from "./Navbar";
 import Boards from "./Boards";
 import Board from "./Board";
 import CreateBoard from "./CreateBoard";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import "antd/dist/antd.css";
 import ls from "local-storage";
-import { Redirect } from "react-router-dom";
 
 const { Content, Sider } = Layout;
 const SAVE_STATE_INTERVAL = 2000;
@@ -116,8 +115,16 @@ class Controller extends Component {
                 };
             });
         } else {
-            throw Error(`Invalid item ${JSON.stringify(text, null, 4)}`);
+            throw Error(`Invalid type for the new item`);
         }
+    };
+
+    deleteBoard = async boardName => {
+        if (this.state.boards.hasOwnProperty(boardName)) {
+            this.setState({ boards: _.omit(this.state.boards, boardName) });
+            return;
+        }
+        throw Error(`Board ${boardName} not found`);
     };
 
     /**
@@ -139,9 +146,9 @@ class Controller extends Component {
                     }
                 };
             });
-            return;
+            return "Item destroyed";
         } else {
-            throw Error(`Item not found for key: ${key}`);
+            throw Error("Item not found");
         }
     };
 
@@ -162,7 +169,7 @@ class Controller extends Component {
         } else message.error("Key not found while trying to toggle item");
     };
 
-    createBoard = (boardName, description) => {
+    createBoard = async (boardName, description) => {
         if (typeof boardName === "string") {
             if (boardName.length > 0) {
                 if (!this.state.boards.hasOwnProperty(boardName)) {
@@ -177,13 +184,12 @@ class Controller extends Component {
                             }
                         };
                     });
-                    return true;
+                    return `Board ${boardName} created!`;
                 } else {
-                    message.error(`The board "${boardName}" already exists`);
+                    throw Error(`The board "${boardName}" already exists`);
                 }
-            } else message.error("The board name must not be empty");
-        } else message.error("Invalid board name");
-        return false;
+            } else throw Error("The board name must not be empty");
+        } else throw Error("Invalid board name");
     };
 
     saveStateToLocalStorage = () => {
@@ -235,19 +241,20 @@ class Controller extends Component {
                                     <Route
                                         exact
                                         path="/"
-                                        component={() => (
+                                        render={() => (
                                             <Boards
                                                 onColSliderChange={this.onColSliderChange}
                                                 columns={this.state.gridColumns}
                                                 boards={this.state.boards}
                                                 getBoardClone={this.getBoardClone}
+                                                deleteBoard={this.deleteBoard}
                                             />
                                         )}
                                     />
                                     <Route
                                         exact
                                         path="/board/create"
-                                        render={(props) => <CreateBoard {...props} createBoard={this.createBoard} />}
+                                        render={props => <CreateBoard {...props} createBoard={this.createBoard} />}
                                     />
                                     <Route
                                         path="/board/:boardName"

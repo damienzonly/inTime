@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-import { Row, Col, Card, Slider, List, Tag, Divider } from "antd";
+import { Row, Col, Card, Slider, List, Tag, Divider, Button, message } from "antd";
 
 export default class Boards extends Component {
     constructor(props) {
@@ -27,9 +27,26 @@ export default class Boards extends Component {
             let newCard = (
                 <Card
                     title={
-                        <div style={{ width: "auto", height: "auto" }}>
-                            <Link to={`/board/${boardName}`}>{boardName.capFirst()}</Link>
-                        </div>
+                        <>
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                <div>
+                                    <Link to={`/board/${boardName}`}>{boardName.capFirst()}</Link>
+                                </div>
+                                <div>
+                                    <Button
+                                        type="danger"
+                                        icon="delete"
+                                        style={{ width: "50px" }}
+                                        onClick={() => {
+                                            this.props
+                                                .deleteBoard(boardName)
+                                                .then(() => message.success(`Board ${boardName} deleted succesfully!`))
+                                                .catch(err => message.error(err.message));
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        </>
                     }
                     style={{
                         marginLeft: "auto",
@@ -50,13 +67,7 @@ export default class Boards extends Component {
                                     <Tag color={color[item.priority]}>{item.priority.toUpperCase()}</Tag>
                                 </span>
                                 <Divider type="vertical" />
-                                <span
-                                    style={
-                                        item.done
-                                            ? { fontStyle: "italic", textDecoration: "line-through" }
-                                            : {}
-                                    }
-                                >
+                                <span style={item.done ? { fontStyle: "italic", textDecoration: "line-through" } : {}}>
                                     {item.text.capFirst()}
                                 </span>
                             </List.Item>

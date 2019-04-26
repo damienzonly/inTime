@@ -49,14 +49,17 @@ export default class CreateBoard extends Component {
                             <Form.Item>
                                 <Button
                                     type="default"
-                                    onClick={() => {
-                                        if (
-                                            this.props.createBoard(this.state.draftTitle, this.state.draftDescription)
-                                        ) {
-                                            this.setState({ redirectDashboard: true });
-                                            this.props.history.push("/")
-                                            message.success("New board created!");
-                                            this.props.history.push("/")
+                                    onClick={async () => {
+                                        try {
+                                            message.success(
+                                                await this.props.createBoard(
+                                                    this.state.draftTitle,
+                                                    this.state.draftDescription
+                                                )
+                                            );
+                                            this.props.history.push(`/board/${this.state.draftTitle}`);
+                                        } catch (err) {
+                                            message.error(err.message);
                                         }
                                     }}
                                 >
