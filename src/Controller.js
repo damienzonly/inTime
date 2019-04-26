@@ -119,6 +119,17 @@ class Controller extends Component {
         }
     };
 
+    editItem = async (key, boardName, nextText) => {
+        let board = this.getBoardClone(boardName);
+        let position = board.items.map(item => item.key).indexOf(key);
+        if (position < 0) throw Error("Item not found");
+        board.items[position].text = nextText;
+        this.setState(state => {
+            return { boards: { ...state.boards, [boardName]: board } };
+        });
+        return "Item updated succesfully";
+    };
+
     deleteBoard = async boardName => {
         if (this.state.boards.hasOwnProperty(boardName)) {
             this.setState({ boards: _.omit(this.state.boards, boardName) });
@@ -268,6 +279,7 @@ class Controller extends Component {
                                                 fontSize={this.state.fontSize}
                                                 changeFontSize={this.changeFontSize}
                                                 destroyItemFromBoard={this.destroyItemFromBoard}
+                                                editItem={this.editItem}
                                             />
                                         )}
                                     />

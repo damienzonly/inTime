@@ -1,5 +1,20 @@
 import React, { Component } from "react";
-import { Row, Col, Input, Breadcrumb, Slider, Select, Table, Tag, Button, message, Divider, Tooltip, Icon } from "antd";
+import {
+    Row,
+    Col,
+    Input,
+    Breadcrumb,
+    Modal,
+    Slider,
+    Select,
+    Table,
+    Tag,
+    Button,
+    message,
+    Divider,
+    Tooltip,
+    Icon
+} from "antd";
 import { Link } from "react-router-dom";
 message.config({
     duration: 3,
@@ -11,7 +26,10 @@ export default class Board extends Component {
         super(props);
         this.state = {
             currentDraft: "",
-            currentPriority: "critical"
+            currentPriority: "critical",
+            editModalVisible: false,
+            editText: "",
+            editKey: NaN
         };
     }
 
@@ -136,6 +154,21 @@ export default class Board extends Component {
                     let tooltip = record.done ? "Uncheck" : "Check";
                     return (
                         <div style={{ minWidth: 150 }}>
+                            <Tooltip placement="top" title="Edit">
+                                <Button
+                                    type="default"
+                                    onClick={() => {
+                                        this.setState({
+                                            editModalVisible: true,
+                                            editText: record.text,
+                                            editKey: key
+                                        });
+                                    }}
+                                >
+                                    <i className="fa fa-edit" />
+                                </Button>
+                            </Tooltip>
+                            <Divider type="vertical" />
                             <Tooltip placement="top" title={tooltip}>
                                 <Button
                                     type="success"
@@ -167,6 +200,25 @@ export default class Board extends Component {
         );
         return (
             <>
+                <Modal
+                    title="Edit item"
+                    centered
+                    visible={this.state.editModalVisible}
+                    onCancel={() => this.setState({ editModalVisible: false })}
+                    onOk={() => {
+                        this.props
+                            .editItem(this.state.editKey, this.props.boardName, this.state.editText)
+                            .then(msg => message.success(msg))
+                            .catch(err => message.error(err.message));
+                        this.setState({ editModalVisible: false, editText: "", editKey: NaN });
+                    }}
+                >
+                
+                    <Input.TextArea
+                        value={this.state.editText}
+                        onChange={e => this.setState({ editText: e.target.value })}
+                    />
+                </Modal>
                 <Row>
                     <Col {...spacing} style={{ marginTop: 30 }}>
                         <h3>Font size</h3>
