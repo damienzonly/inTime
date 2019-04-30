@@ -254,6 +254,7 @@ class Controller extends Component {
                                         path="/"
                                         render={() => (
                                             <Boards
+                                                priorities={this.priorities}
                                                 onColSliderChange={this.onColSliderChange}
                                                 columns={this.state.gridColumns}
                                                 boards={this.state.boards}
@@ -272,6 +273,7 @@ class Controller extends Component {
                                         render={props => (
                                             <Board
                                                 {...props}
+                                                priorities={this.priorities}
                                                 boardName={props.match.params.boardName}
                                                 board={this.getBoardClone(props.match.params.boardName)}
                                                 addItemToBoard={this.addItemToBoard}
