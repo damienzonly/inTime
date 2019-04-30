@@ -1,17 +1,18 @@
 import React, { Component } from "react";
 import _ from "lodash";
-import { Layout } from "antd";
+import { Layout, message } from "antd";
 import Navbar from "./Navbar";
 import Boards from "./Boards";
 import Board from "./Board";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import CreateBoard from "./CreateBoard";
+import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import "antd/dist/antd.css";
 import ls from "local-storage";
 
 const { Content, Sider } = Layout;
-const SAVE_STATE_INTERVAL = 2000;
-const LOCAL_STORAGE_KEY = "todo_app_state";
-
+const SAVE_STATE_INTERVAL = Number(process.env.REACT_APP_SAVE_STATE_INTERVAL);
+const LOCAL_STORAGE_KEY = process.env.REACT_APP_LOCAL_STORAGE_KEY;
+const AUTOSAVE = Number(process.env.REACT_APP_AUTOSAVE)
 
 class Controller extends Component {
     constructor(props) {
@@ -23,88 +24,90 @@ class Controller extends Component {
             trivial: 3
         };
         this.state = {
-            fontSize: 15,
-            gridColumns: 3,
+            currentKeyCounter: 5,
+            fontSize: 20,
+            gridColumns: 2,
             boards: {
-                default0: {
+                "shopping list": {
                     items: [
                         {
-                            text: "Text 1",
+                            text: "milk",
                             priority: "critical",
                             done: false,
-                            created: new Date()
+                            created: new Date(),
+                            key: 0
                         },
                         {
-                            text: "Long text 2",
+                            text: "Butter",
                             priority: "major",
                             done: false,
-                            created: new Date()
+                            created: new Date(),
+                            key: 1
                         },
                         {
-                            text: "First default item ".repeat(10),
+                            text: "Oil",
                             priority: "minor",
                             done: false,
-                            created: new Date()
+                            created: new Date(),
+                            key: 2
                         },
                         {
-                            text: "First default item",
+                            text: "Outfit",
                             priority: "trivial",
                             done: true,
-                            created: new Date()
+                            created: new Date(),
+                            key: 3
                         }
                     ],
-                    description:
-                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+                    description: "Discounts @wallmart"
                 },
-                default1: {
+                homeworks: {
                     items: [
                         {
-                            text: "First default item",
-                            priority: "critical",
-                            done: true,
-                            created: new Date()
-                        }
-                    ],
-                    created_date: new Date(),
-                    description: "nota 1"
-                },
-                default2: {
-                    items: [],
-                    created_date: new Date(),
-                    description: "nota 2"
-                },
-                default3: {
-                    items: [
+                            text: "math exercises",
+                            priority: "minor",
+                            done: false,
+                            created: new Date(),
+                            key: 4
+                        },
                         {
-                            text: "First default item",
-                            priority: "critical",
-                            done: false
+                            text: "literature reading",
+                            priority: "major",
+                            done: false,
+                            created: new Date(),
+                            key: 5
                         }
                     ],
                     created_date: new Date(),
-                    description: "nota 3"
+                    description: "Boring, but i need to..."
                 }
             }
         };
         if (ls(LOCAL_STORAGE_KEY)) this.state = ls(LOCAL_STORAGE_KEY);
         this.saveStateInterval = setInterval(() => {
-            this.saveStateToLocalStorage();
+            if (AUTOSAVE) {
+                this.saveStateToLocalStorage();
+            }
         }, SAVE_STATE_INTERVAL);
     }
     /**
      * Adds an item to the list with priority
      * @param {string} text Item text
      * @param {string} boardName list object where Item belongs to
+     * @param {string} priority list object where Item belongs to
      */
     addItemToBoard = (text, boardName, priority = "critical") => {
         // disable invalid inputs
-        if (typeof priority !== "string") priority = this.getPriorityByCode(priority);
         if (text.match(/^\s*$/)) return;
         if (typeof text === "string") {
             let oldBoard = this.getBoardClone(boardName);
-            oldBoard.items = [{ text, priority, done: false }, ...oldBoard.items];
             this.setState(state => {
+                oldBoard.items = [
+                    { text, priority, done: false, created: new Date(), key: state.currentKeyCounter + 1 },
+                    ...oldBoard.items
+                ];
                 return {
+                    currentKeyCounter: state.currentKeyCounter + 1,
                     boards: {
                         ...state.boards,
                         [boardName]: oldBoard
@@ -112,36 +115,115 @@ class Controller extends Component {
                 };
             });
         } else {
-            throw Error(`Invalid item ${JSON.stringify(text, null, 4)}`);
+            throw Error(`Invalid type for the new item`);
         }
     };
 
+    editItem = async (key, boardName, nextText) => {
+        let board = this.getBoardClone(boardName);
+        let position = board.items.map(item => item.key).indexOf(key);
+        if (position < 0) throw Error("Item not found");
+        board.items[position].text = nextText;
+        this.setState(state => {
+            return { boards: { ...state.boards, [boardName]: board } };
+        });
+        return "Item updated succesfully";
+    };
 
-    saveStateToLocalStorage = ()=> {
+    deleteBoard = async boardName => {
+        if (this.state.boards.hasOwnProperty(boardName)) {
+            this.setState({ boards: _.omit(this.state.boards, boardName) });
+            return;
+        }
+        throw Error(`Board ${boardName} not found`);
+    };
+
+    /**
+     * Removes the item with given key from boardName
+     * @param {number} key
+     * @param {string} boardName
+     */
+    destroyItemFromBoard = async (key, boardName) => {
+        let boardClone = this.getBoardClone(boardName);
+        let keys = boardClone.items.map(item => item.key);
+        let itemKey = keys.indexOf(key);
+        if (itemKey !== -1) {
+            boardClone.items = boardClone.items.filter(item => item.key !== key);
+            this.setState(state => {
+                return {
+                    boards: {
+                        ...state.boards,
+                        [boardName]: boardClone
+                    }
+                };
+            });
+            return "Item destroyed";
+        } else {
+            throw Error("Item not found");
+        }
+    };
+
+    toggleDoneOnItem = (key, boardName) => {
+        let nextBoard = this.getBoardClone(boardName);
+        let itemKeys = nextBoard.items.map(item => item.key);
+        let position = itemKeys.indexOf(key);
+        if (position >= 0) {
+            nextBoard.items[position].done = !nextBoard.items[position].done;
+            this.setState(state => {
+                return {
+                    boards: {
+                        ...state.boards,
+                        [boardName]: nextBoard
+                    }
+                };
+            });
+        } else message.error("Key not found while trying to toggle item");
+    };
+
+    createBoard = async (boardName, description) => {
+        if (typeof boardName === "string") {
+            if (boardName.length > 0) {
+                if (!this.state.boards.hasOwnProperty(boardName)) {
+                    this.setState(state => {
+                        return {
+                            boards: {
+                                ...state.boards,
+                                [boardName]: {
+                                    items: [],
+                                    description
+                                }
+                            }
+                        };
+                    });
+                    return `Board ${boardName} created!`;
+                } else {
+                    throw Error(`The board "${boardName}" already exists`);
+                }
+            } else throw Error("The board name must not be empty");
+        } else throw Error("Invalid board name");
+    };
+
+    saveStateToLocalStorage = () => {
         ls.set(LOCAL_STORAGE_KEY, this.state);
-    }
-    getBoardClone = (boardName = this.state.currentBoard) => {
-        if (boardName.match(/^\s*$/)) return;
+    };
+
+    getBoardClone = boardName => {
+        if (boardName.match(/^\s*$/)) return null;
         if (this.state.boards.hasOwnProperty(boardName)) return _.cloneDeep(this.state.boards[boardName]);
-        throw Error(`List doesn't exist: "${boardName}"`);
+        message.error(`Board doesn't exist: "${boardName}"`);
+        return null;
     };
 
     getPrioritybyName = name => {
         if (typeof name !== "string") return;
         if (this.priorities.hasOwnProperty(name)) return this.priorities[name];
-        throw Error(`Priority with name "${name}" not found`);
-    };
-
-    getPriorityByCode = value => {
-        if (typeof value !== "number") return;
-        let inverted = _.invert(this.priorities);
-        if (inverted.hasOwnProperty(value)) return inverted[value];
-        throw Error(`Priority with value "${value}" not found`);
+        message.error(`Priority with name "${name}" not found`);
     };
 
     onColSliderChange = newVal => {
         this.setState({ gridColumns: newVal });
     };
+
     changeFontSize = val => {
         this.setState({ fontSize: val });
     };
@@ -152,7 +234,6 @@ class Controller extends Component {
                 <Router>
                     <Layout>
                         <Sider
-                            width="20vw"
                             collapsible
                             collapsed={this.state.isSidebarCollapsed}
                             onCollapse={() => {
@@ -171,28 +252,38 @@ class Controller extends Component {
                                     <Route
                                         exact
                                         path="/"
-                                        component={() => (
+                                        render={() => (
                                             <Boards
                                                 onColSliderChange={this.onColSliderChange}
                                                 columns={this.state.gridColumns}
                                                 boards={this.state.boards}
                                                 getBoardClone={this.getBoardClone}
+                                                deleteBoard={this.deleteBoard}
                                             />
                                         )}
+                                    />
+                                    <Route
+                                        exact
+                                        path="/board/create"
+                                        render={props => <CreateBoard {...props} createBoard={this.createBoard} />}
                                     />
                                     <Route
                                         path="/board/:boardName"
                                         render={props => (
                                             <Board
                                                 {...props}
-                                                title={props.match.params.boardName}
+                                                boardName={props.match.params.boardName}
                                                 board={this.getBoardClone(props.match.params.boardName)}
                                                 addItemToBoard={this.addItemToBoard}
+                                                toggleDoneOnItem={this.toggleDoneOnItem}
                                                 fontSize={this.state.fontSize}
                                                 changeFontSize={this.changeFontSize}
+                                                destroyItemFromBoard={this.destroyItemFromBoard}
+                                                editItem={this.editItem}
                                             />
                                         )}
                                     />
+                                    <Route path="*" render={() => <Redirect to="/" />} />
                                 </Switch>
                             </Content>
                         </Layout>
