@@ -10,9 +10,9 @@ import "antd/dist/antd.css";
 import ls from "local-storage";
 
 const { Content, Sider } = Layout;
-const SAVE_STATE_INTERVAL = 2000;
-const LOCAL_STORAGE_KEY = "todo_app_state";
-const AUTOSAVE = false;
+const SAVE_STATE_INTERVAL = Number(process.env.REACT_APP_SAVE_STATE_INTERVAL);
+const LOCAL_STORAGE_KEY = process.env.REACT_APP_LOCAL_STORAGE_KEY;
+const AUTOSAVE = Number(process.env.REACT_APP_AUTOSAVE)
 
 class Controller extends Component {
     constructor(props) {
