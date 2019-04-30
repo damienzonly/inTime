@@ -5,9 +5,10 @@ WORKDIR /dist
 COPY src src
 COPY public public
 COPY package.json package.json
+COPY .env.production.local .
 
-RUN yarn install
-RUN yarn build
+RUN yarn install > /dev/null
+RUN yarn build > /dev/null
 
 FROM nginx:alpine
 WORKDIR /
