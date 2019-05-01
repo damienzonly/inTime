@@ -18,11 +18,7 @@ export default class Boards extends Component {
                 <Row style={{ height: "100vh", display: "flex" }}>
                     <Col span={12} offset={6} style={{ textAlign: "center", marginTop: 300 }}>
                         <Card title="There are no boards">
-                            <span>
-                                Create a new one with the sidebar on the left
-                            </span>
                             <div>
-
                                 <Link to="/board/create">
                                     <Button
                                         type="primary"
@@ -30,7 +26,7 @@ export default class Boards extends Component {
                                         style={{
                                             marginTop: 30
                                         }}
-                                    >Create a board
+                                    >Create new board
                                 </Button>
                                 </Link>
                             </div>
