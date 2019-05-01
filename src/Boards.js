@@ -13,6 +13,28 @@ export default class Boards extends Component {
     }
     render() {
         let boards = Object.keys(this.props.boards);
+        if (boards.length === 0) {
+            return (
+                <Row style={{ height: "100vh", display: "flex" }}>
+                    <Col span={12} offset={6} style={{ textAlign: "center", marginTop: 300 }}>
+                        <Card title="There are no boards">
+                            <div>
+                                <Link to="/board/create">
+                                    <Button
+                                        type="primary"
+                                        icon="plus"
+                                        style={{
+                                            marginTop: 30
+                                        }}
+                                    >Create new board
+                                </Button>
+                                </Link>
+                            </div>
+                        </Card>
+                    </Col>
+                </Row>
+            )
+        }
         let rows = [];
         let cols = [];
         for (let [index, boardName] of boards.entries()) {

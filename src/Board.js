@@ -42,12 +42,11 @@ export default class Board extends Component {
         this.setState({ currentDraft: "" });
     };
 
-    render() {
+    render = () => {
         let spacing = {
             span: 12,
             offset: 6
         };
-
         let priorityColumn = (
             <Table.Column
                 title="Priority"
@@ -67,17 +66,15 @@ export default class Board extends Component {
                         </Tag>
                     );
                 }}
-                filters={[
-                    { text: "Critical", value: "critical" },
-                    { text: "Major", value: "major" },
-                    { text: "Minor", value: "minor" },
-                    { text: "Trivial", value: "trivial" }
-                ]}
+                filters={
+                    Object.keys(this.props.priorities).map((item) => { return { text: item.capFirst(), value: item } })
+                }
                 onFilter={(value, record) => {
                     return record.priority === value;
                 }}
                 sorter={(a, b) => {
-                    let pts = ["critical", "major", "minor", "trivial"];
+                    console.log(this.props)
+                    let pts = Object.keys(this.props.priorities)
                     let map = {};
                     // set numbered priorities based on array position
                     pts.map((item, index) => Object.assign(map, { [item]: index }));
@@ -213,7 +210,7 @@ export default class Board extends Component {
                         this.setState({ editModalVisible: false, editText: "", editKey: NaN });
                     }}
                 >
-                
+
                     <Input.TextArea
                         value={this.state.editText}
                         onChange={e => this.setState({ editText: e.target.value })}
@@ -275,10 +272,7 @@ export default class Board extends Component {
                                         defaultValue="critical"
                                         onChange={option => this.setState({ currentPriority: option })}
                                     >
-                                        <Select.Option value="critical"> Critical </Select.Option>
-                                        <Select.Option value="major"> Major </Select.Option>
-                                        <Select.Option value="minor"> Minor </Select.Option>
-                                        <Select.Option value="trivial"> Trivial </Select.Option>
+                                        {Object.keys(this.props.priorities).map(item => <Select.Option key={item} value={item}>{item.capFirst()}</Select.Option>)}
                                     </Select>
                                 }
                                 addonAfter={<Icon type="plus" onClick={this.addItemToBoard} />}
